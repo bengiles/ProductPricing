@@ -1,17 +1,21 @@
 ﻿using Microsoft.AspNetCore.Components;
-using static System.Net.WebRequestMethods;
+using ProductPricing.Helpers;
+using ProductPricing.Models;
 
 namespace ProductPricing.Components.Pages
 {
     public class ProductsBase : ComponentBase
     {
-        private List<ProductDto>? _products;
-        private ProductHistoryDto? _selectedHistory;
-        private string _message = string.Empty;
-        private bool _isError;
+        [Inject]
+        protected IApiHelper Api { get; set; } = default!;
 
-        private readonly Dictionary<int, decimal> _discountInputs = new();
-        private readonly Dictionary<int, decimal> _priceInputs = new();
+        protected List<Product>? _products;
+        protected Product? _selectedHistory;
+        protected string _message = string.Empty;
+        protected bool _isError;
+
+        protected readonly Dictionary<int, decimal> _discountInputs = new();
+        protected readonly Dictionary<int, decimal> _priceInputs = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -22,7 +26,7 @@ namespace ProductPricing.Components.Pages
         {
             try
             {
-                _products = await Http.GetFromJsonAsync<List<ProductDto>>("api/products");
+                _products = await Api.GetAsync<List<Product>>("api/products");
                 if (_products is not null)
                 {
                     foreach (var p in _products)
@@ -38,7 +42,7 @@ namespace ProductPricing.Components.Pages
             }
         }
 
-        private async Task ApplyDiscount(int id)
+        protected async Task ApplyDiscount(int id)
         {
             if (!_discountInputs.TryGetValue(id, out var discount) || discount < 0 || discount > 100)
             {
@@ -48,19 +52,9 @@ namespace ProductPricing.Components.Pages
 
             try
             {
-                var response = await Http.PostAsJsonAsync($"api/products/{id}/apply-discount",
-                    new { discountPercentage = discount });
-
-                if (response.IsSuccessStatusCode)
-                {
-                    ShowMessage($"Discount of {discount}% applied successfully.", false);
-                    await LoadProducts();
-                }
-                else
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    ShowMessage($"Error: {error}", true);
-                }
+                await Api.PostAsync<object>($"api/products/{id}/apply-discount", new { discountPercentage = discount });
+                ShowMessage($"Discount of {discount}% applied successfully.", false);
+                await LoadProducts();
             }
             catch (Exception ex)
             {
@@ -68,7 +62,7 @@ namespace ProductPricing.Components.Pages
             }
         }
 
-        private async Task UpdatePrice(int id)
+        protected async Task UpdatePrice(int id)
         {
             if (!_priceInputs.TryGetValue(id, out var newPrice) || newPrice <= 0)
             {
@@ -78,19 +72,9 @@ namespace ProductPricing.Components.Pages
 
             try
             {
-                var response = await Http.PutAsJsonAsync($"api/products/{id}/update-price",
-                    new { newPrice });
-
-                if (response.IsSuccessStatusCode)
-                {
-                    ShowMessage($"Price updated to {newPrice:C} successfully.", false);
-                    await LoadProducts();
-                }
-                else
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    ShowMessage($"Error: {error}", true);
-                }
+                await Api.PutAsync<object>($"api/products/{id}/update-price", new { newPrice });
+                ShowMessage($"Price updated to {newPrice:C} successfully.", false);
+                await LoadProducts();
             }
             catch (Exception ex)
             {
@@ -98,11 +82,11 @@ namespace ProductPricing.Components.Pages
             }
         }
 
-        private async Task ViewHistory(int id)
+        protected async Task ViewHistory(int id)
         {
             try
             {
-                _selectedHistory = await Http.GetFromJsonAsync<ProductHistoryDto>($"api/products/{id}");
+                _selectedHistory = await Api.GetAsync<Product>($"api/products/{id}");
             }
             catch (Exception ex)
             {
@@ -110,32 +94,11 @@ namespace ProductPricing.Components.Pages
             }
         }
 
-        private void ShowMessage(string message, bool isError)
+        protected void ShowMessage(string message, bool isError)
         {
             _message = message;
             _isError = isError;
             StateHasChanged();
-        }
-
-        private class ProductDto
-        {
-            public int Id { get; set; }
-            public string Name { get; set; } = string.Empty;
-            public decimal Price { get; set; }
-            public DateTime LastUpdated { get; set; }
-        }
-
-        private class ProductHistoryDto
-        {
-            public int Id { get; set; }
-            public string Name { get; set; } = string.Empty;
-            public List<PriceHistoryEntryDto> PriceHistory { get; set; } = [];
-        }
-
-        private class PriceHistoryEntryDto
-        {
-            public decimal Price { get; set; }
-            public string Date { get; set; } = string.Empty;
         }
     }
 }

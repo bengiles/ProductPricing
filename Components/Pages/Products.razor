@@ -1,6 +1,7 @@
 @page "/products"
+@using ProductPricing.Helpers
 @rendermode InteractiveServer
-@inject HttpClient Http
+@inject IApiHelper Api
 @inherits ProductsBase
 
 <PageTitle>Products</PageTitle>
@@ -95,8 +96,4 @@ else
             }
         </div>
     </div>
-}
-
-@code {
-   
 }
