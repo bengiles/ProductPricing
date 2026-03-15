@@ -54,8 +54,22 @@ namespace ProductPricing.Components.Pages
 
             try
             {
-                await Api.PostAsync<object>($"api/products/{id}/apply-discount", new { discountPercentage = discount });
+                await Api.PostAsync<ApplyDiscountResponse>($"api/products/{id}/apply-discount", new { discountPercentage = discount });
                 ShowMessage($"Discount of {discount}% applied successfully.", false);
+                await LoadProducts();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Request failed: {ex.Message}", true);
+            }
+        }
+
+        protected async Task ClearDiscount(int id)
+        {
+            try
+            {
+                await Api.PostAsync<ApplyDiscountResponse>($"api/products/{id}/apply-discount", new { discountPercentage = 0 });
+                ShowMessage("Discount cleared.", false);
                 await LoadProducts();
             }
             catch (Exception ex)
