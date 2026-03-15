@@ -1,5 +1,7 @@
 <Solution>
   <Project Path="../ProductPricing.API/ProductPricing.API.csproj" />
   <Project Path="../ProductPricing.Models/ProductPricing.Models.csproj" />
-  <Project Path="ProductPricing.csproj" />
+  <Project Path="ProductPricing.csproj">
+    <BuildDependency Project="../ProductPricing.API/ProductPricing.API.csproj" />
+  </Project>
 </Solution>
