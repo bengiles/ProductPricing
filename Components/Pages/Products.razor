@@ -38,8 +38,8 @@ else
             {
                 <tr>
                     <td>@product.Name</td>
-                    <td>@product.Price.ToString("C")</td>
-                    <td>@product.LastUpdated.ToString("g")</td>
+                    <td>@product.Price.ToString(DisplayAsCurrency)</td>
+                    <td>@product.LastUpdated.ToString(DisplayAsDate)</td>
                     <td style="width:140px">
                         <input type="number" class="form-control form-control-sm" min="0" max="100"
                                @bind="_discountInputs[product.Id]" placeholder="0-100" />

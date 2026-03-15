@@ -16,6 +16,8 @@ namespace ProductPricing.Components.Pages
 
         protected readonly Dictionary<int, decimal> _discountInputs = new();
         protected readonly Dictionary<int, decimal> _priceInputs = new();
+        protected const string DisplayAsCurrency = "C";
+        protected const string DisplayAsDate = "g";
 
         protected override async Task OnInitializedAsync()
         {
