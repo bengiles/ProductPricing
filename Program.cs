@@ -1,5 +1,5 @@
 using ProductPricing.Components;
-using ProductPricing.Services;
+using ProductPricing.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +16,7 @@ builder.Services.AddHttpClient("Api", client =>
 });
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+builder.Services.AddScoped<IApiHelper, ApiHelper>();
 
 var app = builder.Build();
 
