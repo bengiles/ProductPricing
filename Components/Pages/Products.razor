@@ -18,7 +18,7 @@
     </div>
 }
 
-<ProductList Items="_products" TItem="Product">
+<ProductList Items="_products" TItem="ProductSummaryDto">
     <HeaderTemplate>
         <th>Name</th>
         <th>Price</th>
@@ -30,12 +30,11 @@
     <RowTemplate Context="product">
         <td>@product.Name</td>
         <td>
-            @if (product.DiscountedPrice.HasValue)
+            @if (_activeDiscounts.TryGetValue(product.Id, out var disc))
             {
-                <span class="text-decoration-line-through text-muted">@product.Price.ToString(DisplayAsCurrency)</span>
+                <span class="text-decoration-line-through text-muted">@disc.OriginalPrice.ToString(DisplayAsCurrency)</span>
                 <br />
-                <span class="text-success fw-bold">@product.DiscountedPrice.Value.ToString(DisplayAsCurrency)</span>
-                <span class="badge bg-warning text-dark">-@product.DiscountPercentage%</span>
+                <span class="text-success fw-bold">@disc.DiscountedPrice.ToString(DisplayAsCurrency)</span>
             }
             else
             {

@@ -23,7 +23,7 @@
                         {
                             <tr>
                                 <td>@entry.Price.ToString("C")</td>
-                                <td>@entry.Date</td>
+                                <td>@entry.Date.ToString("d")</td>
                             </tr>
                         }
                     </tbody>
@@ -34,6 +34,6 @@
 }
 
 @code {
-    [Parameter] public Product? Product { get; set; }
+    [Parameter] public ProductHistoryDto? Product { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
 }

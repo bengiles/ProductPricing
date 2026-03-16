@@ -9,13 +9,14 @@ namespace ProductPricing.Components.Pages
         [Inject]
         protected IApiHelper Api { get; set; } = default!;
 
-        protected List<Product>? _products;
-        protected Product? _selectedHistory;
+        protected List<ProductSummaryDto>? _products;
+        protected ProductHistoryDto? _selectedHistory;
         protected string _message = string.Empty;
         protected bool _isError;
 
         protected readonly Dictionary<int, decimal> _discountInputs = new();
         protected readonly Dictionary<int, decimal> _priceInputs = new();
+        protected readonly Dictionary<int, ApplyDiscountResponse> _activeDiscounts = new();
         protected const string DisplayAsCurrency = "C";
         protected const string DisplayAsDate = "g";
 
@@ -28,7 +29,7 @@ namespace ProductPricing.Components.Pages
         {
             try
             {
-                _products = await Api.GetAsync<List<Product>>("api/products");
+                _products = await Api.GetAsync<List<ProductSummaryDto>>("api/products");
                 if (_products is not null)
                 {
                     foreach (var p in _products)
@@ -50,7 +51,7 @@ namespace ProductPricing.Components.Pages
         {
             if (_selectedHistory is not null)
             {
-                _selectedHistory = await Api.GetAsync<Product>($"api/products/{_selectedHistory.Id}");
+                _selectedHistory = await Api.GetAsync<ProductHistoryDto>($"api/products/{_selectedHistory.Id}");
             }
         }
 
@@ -64,7 +65,11 @@ namespace ProductPricing.Components.Pages
 
             try
             {
-                await Api.PostAsync<ApplyDiscountResponse>($"api/products/{id}/apply-discount", new { discountPercentage = discount });
+                var result = await Api.PostAsync<ApplyDiscountResponse>($"api/products/{id}/apply-discount", new { discountPercentage = discount });
+                if (result is not null)
+                {
+                    _activeDiscounts[id] = result;
+                }
                 ShowMessage($"Discount of {discount}% applied successfully.", false);
                 await LoadProducts();
             }
@@ -79,6 +84,7 @@ namespace ProductPricing.Components.Pages
             try
             {
                 await Api.PostAsync<ApplyDiscountResponse>($"api/products/{id}/apply-discount", new { discountPercentage = 0 });
+                _activeDiscounts.Remove(id);
                 ShowMessage("Discount cleared.", false);
                 await LoadProducts();
             }
@@ -99,6 +105,7 @@ namespace ProductPricing.Components.Pages
             try
             {
                 await Api.PutAsync<UpdatePriceResponse>($"api/products/{id}/update-price", new { newPrice });
+                _activeDiscounts.Remove(id);
                 ShowMessage($"Price updated to {newPrice:C} successfully.", false);
                 await LoadProducts();
             }
@@ -112,7 +119,7 @@ namespace ProductPricing.Components.Pages
         {
             try
             {
-                _selectedHistory = await Api.GetAsync<Product>($"api/products/{id}");
+                _selectedHistory = await Api.GetAsync<ProductHistoryDto>($"api/products/{id}");
             }
             catch (Exception ex)
             {
