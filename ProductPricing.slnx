@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="../ProductPricing.API/ProductPricing.API.csproj" />
   <Project Path="../ProductPricing.Models/ProductPricing.Models.csproj" />
+  <Project Path="../ProductPricing.TestUnits/ProductPricing.TestUnits.csproj" Id="bf79f5c8-0012-4b0e-b874-20afe4254e73" />
   <Project Path="ProductPricing.csproj">
     <BuildDependency Project="../ProductPricing.API/ProductPricing.API.csproj" />
   </Project>
