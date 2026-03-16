@@ -37,10 +37,20 @@ namespace ProductPricing.Components.Pages
                         _priceInputs.TryAdd(p.Id, 0);
                     }
                 }
+
+                await RefreshHistory();
             }
             catch (Exception ex)
             {
                 ShowMessage($"Failed to load products: {ex.Message}", true);
+            }
+        }
+
+        private async Task RefreshHistory()
+        {
+            if (_selectedHistory is not null)
+            {
+                _selectedHistory = await Api.GetAsync<Product>($"api/products/{_selectedHistory.Id}");
             }
         }
 
@@ -88,7 +98,7 @@ namespace ProductPricing.Components.Pages
 
             try
             {
-                await Api.PutAsync<object>($"api/products/{id}/update-price", new { newPrice });
+                await Api.PutAsync<UpdatePriceResponse>($"api/products/{id}/update-price", new { newPrice });
                 ShowMessage($"Price updated to {newPrice:C} successfully.", false);
                 await LoadProducts();
             }

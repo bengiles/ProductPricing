@@ -1,0 +1,56 @@
+@using ProductPricing.Models
+
+<td style="width:200px">
+    <div class="input-group input-group-sm">
+        <input type="number" class="form-control" min="0" max="100"
+               value="@DiscountInput"
+               @onchange="e => DiscountInputChanged.InvokeAsync(Convert.ToDecimal(e.Value))"
+               placeholder="0-100" />
+
+        @if (DiscountInput > 0 && DiscountInput <= 100 && !Product.DiscountedPrice.HasValue)
+        {
+            <button class="btn btn-warning" @onclick="OnApplyDiscount">
+                Apply
+            </button>
+        }
+
+        @if (Product.DiscountedPrice.HasValue)
+        {
+            <button class="btn btn-outline-warning" @onclick="OnClearDiscount">
+                Clear
+            </button>
+        }
+    </div>
+</td>
+<td style="width:200px">
+    <div class="input-group input-group-sm">
+        <input type="number" class="form-control" min="0.01" step="0.01"
+               value="@PriceInput"
+               @onchange="e => PriceInputChanged.InvokeAsync(Convert.ToDecimal(e.Value))"
+               placeholder="New price" />
+        @if (PriceInput > 0)
+        {
+            <button class="btn btn-primary" @onclick="OnUpdatePrice">
+                Update
+            </button>
+        }
+    </div>
+</td>
+<td>
+   
+    <button class="btn btn-sm btn-info" @onclick="OnViewHistory">
+        View History
+    </button>
+</td>
+
+@code {
+    [Parameter, EditorRequired] public Product Product { get; set; } = default!;
+    [Parameter] public decimal DiscountInput { get; set; }
+    [Parameter] public EventCallback<decimal> DiscountInputChanged { get; set; }
+    [Parameter] public decimal PriceInput { get; set; }
+    [Parameter] public EventCallback<decimal> PriceInputChanged { get; set; }
+    [Parameter] public EventCallback OnApplyDiscount { get; set; }
+    [Parameter] public EventCallback OnClearDiscount { get; set; }
+    [Parameter] public EventCallback OnUpdatePrice { get; set; }
+    [Parameter] public EventCallback OnViewHistory { get; set; }
+}
