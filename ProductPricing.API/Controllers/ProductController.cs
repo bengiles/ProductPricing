@@ -24,31 +24,54 @@ namespace ProductPricing.API.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public IActionResult GetById(int id)
         {
+            if (id <= 0)
+                return BadRequest("Id must be a positive integer.");
+
             var product = _productService.GetProductById(id);
             if (product is null)
                 return NotFound();
             return Ok(product);
         }
 
-        [HttpPost("{id}/apply-discount")]
+        [HttpPost("{id:int}/apply-discount")]
         public IActionResult ApplyDiscount(int id, [FromBody] ApplyDiscountRequest request)
         {
-            var result = _productService.ApplyDiscount(id, request.DiscountPercentage);
-            if (result is null)
-                return NotFound();
-            return Ok(result);
+            if (id <= 0)
+                return BadRequest("Id must be a positive integer.");
+
+            try
+            {
+                var result = _productService.ApplyDiscount(id, request.DiscountPercentage);
+                if (result is null)
+                    return NotFound();
+                return Ok(result);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpPut("{id}/update-price")]
+        [HttpPut("{id:int}/update-price")]
         public IActionResult UpdatePrice(int id, [FromBody] UpdatePriceRequest request)
         {
-            var result = _productService.UpdatePrice(id, request.NewPrice);
-            if (result is null)
-                return NotFound();
-            return Ok(result);
+            if (id <= 0)
+                return BadRequest("Id must be a positive integer.");
+
+            try
+            {
+                var result = _productService.UpdatePrice(id, request.NewPrice);
+                if (result is null)
+                    return NotFound();
+                return Ok(result);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

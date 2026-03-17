@@ -29,11 +29,11 @@
     <RowTemplate Context="product">
         <td>@product.Name</td>
         <td>
-            @if (_activeDiscounts.TryGetValue(product.Id, out var disc))
+            @if (_activeDiscounts.TryGetValue(product.Id, out ApplyDiscountResponse? discountResponse))
             {
-                <span class="text-decoration-line-through text-muted">@disc.OriginalPrice.ToString(DisplayAsCurrency)</span>
+                <span class="text-decoration-line-through text-muted">@discountResponse.OriginalPrice.ToString(DisplayAsCurrency)</span>
                 <br />
-                <span class="text-success fw-bold">@disc.DiscountedPrice.ToString(DisplayAsCurrency)</span>
+                <span class="text-success fw-bold">@discountResponse.DiscountedPrice.ToString(DisplayAsCurrency)</span>
             }
             else
             {

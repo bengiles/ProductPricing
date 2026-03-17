@@ -6,6 +6,8 @@
         public string Name { get; set; } = string.Empty;
         public decimal Price => PriceHistory.Count > 0 ? PriceHistory[0].Price : 0;
         public DateTime LastUpdated => PriceHistory.Count > 0 ? PriceHistory[0].Date : default;
+        // DiscountPercentage and DiscountedPrice are computed here so the service can
+        // return both the original and discounted price in the ApplyDiscountResponse.
         public decimal DiscountPercentage { get; set; }
         public decimal? DiscountedPrice => DiscountPercentage > 0
             ? Math.Round(Price - (Price * DiscountPercentage / 100), 2)

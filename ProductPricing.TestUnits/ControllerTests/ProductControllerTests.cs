@@ -1,16 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Newtonsoft.Json.Linq;
 using ProductPricing.API.Controllers;
 using ProductPricing.API.Services;
 using ProductPricing.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace ProductPricing.TestUnits
+namespace ProductPricing.API.UnitTests.ControllerTests
 {
     [TestFixture]
     public class ProductControllerTests
     {
         private Mock<IProductService> _serviceMock;
         private ProductController _controller;
+
+        // Tests covered
+        // Happy path – asserts OkObjectResult (200) with expected data	
+        //                  GetAll_ReturnsOkWithProducts(),
+        //                  GetById_ReturnsOkWithPriceHistory_WhenProductExists(),
+        //                  ApplyDiscount_ReturnsOkWithDiscountedPrice_WhenProductExists(),
+        //                  UpdatePrice_ReturnsOkWithUpdatedPrice_WhenProductExists()
+        // Not found – asserts NotFoundResult(404)
+        //                  GetById_ReturnsNotFound_WhenProductDoesNotExist(),
+        //                  ApplyDiscount_ReturnsNotFound_WhenProductDoesNotExist(),
+        //                  UpdatePrice_ReturnsNotFound_WhenProductDoesNotExist()
+        // Edge cases – validates boundary values
+        //                  GetAll_ReturnsOkWithEmptyList_WhenNoProducts(),
+        //                  ApplyDiscount_CalculatesCorrectly_ForZeroPercent(),
+        //                  ApplyDiscount_CalculatesCorrectly_For100Percent()
+
 
         [SetUp]
         public void Setup()
@@ -26,7 +44,7 @@ namespace ProductPricing.TestUnits
         {
             var products = new List<ProductSummaryDto>
             {
-                new() { Id = 1, Name = "Product A", Price = 120.0m, LastUpdated = new DateTime(2024, 9, 26, 12, 34, 56) },
+                new() { Id = 1, Name = "Product C", Price = 120.0m, LastUpdated = new DateTime(2024, 9, 26, 12, 34, 56) },
                 new() { Id = 2, Name = "Product B", Price = 200.0m, LastUpdated = new DateTime(2024, 9, 25, 10, 12, 34) }
             };
             _serviceMock.Setup(s => s.GetAllProducts()).Returns(products);
@@ -38,7 +56,7 @@ namespace ProductPricing.TestUnits
             var returned = result.Value as List<ProductSummaryDto>;
             Assert.That(returned, Is.Not.Null);
             Assert.That(returned!, Has.Count.EqualTo(2));
-            Assert.That(returned![0].Name, Is.EqualTo("Product A"));
+            Assert.That(returned![0].Name, Is.EqualTo("Product C"));
             Assert.That(returned[1].Name, Is.EqualTo("Product B"));
         }
 
@@ -219,6 +237,8 @@ namespace ProductPricing.TestUnits
 
         #region Service invocation verification
 
+        // This verifies that ProductController.GetAll() calls IProductService.GetAllProducts() exactly one time — no more, no less.
+        // It doesn't care about the return value; it only cares that the controller properly delegates to the service.
         [Test]
         public void GetAll_CallsServiceExactlyOnce()
         {
@@ -229,6 +249,7 @@ namespace ProductPricing.TestUnits
             _serviceMock.Verify(s => s.GetAllProducts(), Times.Once);
         }
 
+        // This test verifies that GetById(int) correctly delegates to the service layer with the expected argument.
         [Test]
         public void GetById_CallsServiceWithCorrectId()
         {
@@ -238,7 +259,8 @@ namespace ProductPricing.TestUnits
 
             _serviceMock.Verify(s => s.GetProductById(42), Times.Once);
         }
-
+        
+        // This test verifies that ApplyDiscount(int, decimal) correctly delegates to the service layer with the expected arguments.    
         [Test]
         public void ApplyDiscount_CallsServiceWithCorrectParameters()
         {
@@ -249,6 +271,7 @@ namespace ProductPricing.TestUnits
             _serviceMock.Verify(s => s.ApplyDiscount(1, 15m), Times.Once);
         }
 
+        // This test verifies that UpdatePrice(int, decimal) correctly delegates to the service layer with the expected arguments.
         [Test]
         public void UpdatePrice_CallsServiceWithCorrectParameters()
         {
