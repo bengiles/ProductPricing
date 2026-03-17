@@ -51,9 +51,4 @@ namespace ProductPricing.API.Controllers
             return Ok(result);
         }
     }
-
-    public class ApplyDiscountRequest
-    {
-        public decimal DiscountPercentage { get; set; }
-    }
 }
